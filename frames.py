@@ -39,8 +39,8 @@ def get_frames(cap, aruco_dict, parameters, detected, foods, timeout, updated, c
             eindex += 1
 
             if (id == 1):
-                if (not deteceted[id]):
-                    food = Food(id, img1, eindex, frame, corneres, frame_width, frame_height,\
+                if (not detected[id]):
+                    food = Food(id, img1, eindex, frame, corners, frame_width, frame_height,\
                                 console)
                     foods[id] = food
                 curfood.append(foods[id])
