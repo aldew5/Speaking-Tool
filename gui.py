@@ -4,7 +4,7 @@ from PIL import ImageTk
 import threading
 import cv2
 from cv2 import aruco
-from main import get_frames
+from frames import get_frames
 from tkinter import scrolledtext
 from markers import *
 import keyboard
@@ -29,10 +29,7 @@ for i in range(50):
     detected[i] = False
 
 # keep lists of different markers
-variables = {}
-operators = {}
-loops = {}
-
+foods = {}
 # keep track of whether or not an operation has been performed
 # and set a timer between them
 timeout = 0
@@ -155,7 +152,7 @@ class App():
         try:
             while not self.stopEvent.is_set():
                 self.frames = get_frames(self.vs, aruco_dict, parameters, detected,
-                                         variables, operators, loops, timeout, updated, self.console)
+                                         foods, timeout, updated, self.console)
                 self.frames[0] = cv2.resize(self.frames[0], (300,300))
                 self.frames[1] = cv2.resize(self.frames[1], (300,300))
 
