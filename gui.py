@@ -57,6 +57,7 @@ class Console():
         self.food_var.set(OPTIONS[0])
 
         w = tk.OptionMenu(self.window, self.food_var, *OPTIONS)
+        w.config(width=40)
         
         start = tk.Button(self.window,
                     text="Confirm",
