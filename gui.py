@@ -9,12 +9,6 @@ from tkinter import scrolledtext
 from markers import *
 import keyboard
 
-
-"""
-Error with loading image
-"""
-
-
 cap = cv2.VideoCapture(0)
 
 aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
@@ -35,6 +29,18 @@ foods = {}
 timeout = 0
 updated = False
 
+#images
+pizza = Image.open("_data/pizza.jpg")
+pizza = pizza.resize((200, 200), Image.ANTIALIAS)
+#pizza = ImageTk.PhotoImage(pizza)
+
+hotdog = Image.open("_data/hotdog.jpg")
+hotdog = hotdog.resize((200, 200), Image.ANTIALIAS)
+#hotdog = ImageTk.PhotoImage(hotdog)
+
+images = {}
+images["Hotdog"] = hotdog
+images["Pizza"] = pizza
 
 class Console():
     def __init__(self, x, y, window):
@@ -43,6 +49,7 @@ class Console():
         self.window = window
         self.widgets = []
         self.pressed = False
+        self.display = "console"
 
         self.widgets.append(scrolledtext.ScrolledText(self.window,  
                                       wrap = tk.WORD,  
@@ -60,7 +67,7 @@ class Console():
         w.config(width=40)
         
         start = tk.Button(self.window,
-                    text="Confirm",
+                    text="Confirm Selection",
                     command=self.reset_window,
                     bg="green")
         
@@ -99,11 +106,13 @@ class Console():
         if (op == "food"):
             self.widgets[1].place(relx=self.x, rely=self.y)
 
-            self.widgets[2].place(relx=0.45, rely=0.5)
+            self.widgets[2].place(relx=0.68, rely=0.6)
             self.widgets[0].place_forget()
+            self.display = "food"
+            
         elif (op == "main"):
             self.widgets[0].place(relx=self.x, rely=self.y)
-
+            self.display = "console"
             
     
 
@@ -134,9 +143,10 @@ class Menu(tk.Frame):
 
 
 class App():
-    def __init__(self, window, vs):
+    def __init__(self, window, vs, menu, images):
         self.window = window
         self.vs = vs
+        self.images = images
         self.frames = [0, 0]
         self.thread = None
         self.stopEvent = None
@@ -144,13 +154,24 @@ class App():
         self.panel2 = None
         self.console = Console(0.6, 0.15, self.window)
         self.markers = []
+        self.image = ""
+
+        self.canvas = tk.Canvas(self.window, width = 300, height = 300)
+        self.canvas.place(relx=0.6, rely=0.2)
+
+        #img = ImageTk.PhotoImage(Image.open("_data/pizza.jpg"))
+        #self.canvas.create_image(500, 500, image=img)
+        
+
+
         
         self.stopEvent = threading.Event()
         self.thread = threading.Thread(target=self.videoLoop, args=())
         self.thread.start()
+        
 
 
-    def show(self, menu):
+    def show(self):
         title = tk.Label(self.window, text="ARCVision",
                          anchor="center",
                          font=("Times New Roman", 20))
@@ -159,7 +180,7 @@ class App():
                             font=("Time New Roman", 15))
         subtitle.place(relx=0.65, rely=0.1)
 
-        if (menu == "food"):
+        if (self.console.display == "food"):
             self.console.display_menu("food")
         else:
             self.console.display_menu("main")
@@ -177,6 +198,17 @@ class App():
         
                 for marker in self.markers:
                     marker.display()
+
+                ##        print(self.console.display)
+                if (self.console.display == "food"):
+                    if (self.console.food_var.get() != self.image):
+                        self.image = self.console.food_var.get()
+
+                        print("HERE")
+                        self.canvas.create_image(20, 20, anchor=tk.NW,\
+                            image=ImageTk.PhotoImage(self.images[self.image]))
+
+                    
                     
                 self.frames[0] = cv2.resize(self.frames[0], (300,300))
                 self.frames[1] = cv2.resize(self.frames[1], (300,300))
@@ -229,9 +261,9 @@ if (__name__ == "__main__"):
     window.title("ARCVision")
     window.geometry("800x800")
     
-    app = App(window, cap)
+    app = App(window, cap, "main", images)
     
-    app.show("main")
+    app.show()
     app.window.mainloop()
     
 
