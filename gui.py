@@ -35,27 +35,44 @@ foods = {}
 timeout = 0
 updated = False
 
+WINDOW = "main"
+
 class Console():
     def __init__(self, x, y, window):
         self.x = x
         self.y = y
         self.cursor = '> '
         self.window = window
+        self.widgets = []
 
-        self.textfield = scrolledtext.ScrolledText(self.window,  
+        self.widgets.append(scrolledtext.ScrolledText(self.window,  
                                       wrap = tk.WORD,  
                                       width = 30,  
                                       height = 27,  
                                       font = ("Times New Roman", 
-                                              15))
-        
-    def show(self):
-        # https://www.geeksforgeeks.org/python-tkinter-scrolledtext-widget/
-        self.textfield.place(relx=self.x, rely=self.y)
-        #self.textfield.insert(tk.INSERT, self.cursor)
+                                              15)))
 
-    def update(self, text):
-        self.textfield.insert(tk.INSERT,  "\n" + text)
+        OPTIONS = ["Pizza", "Hotdog"]
+
+        var = tk.StringVar(self.window)
+        var.set(OPTIONS[0])
+
+        w = tk.OptionMenu(self.window, var, *OPTIONS)
+        
+        start = tk.Button(self.window,
+                    text="Confirm",
+                    command=self.reset_window,
+                    bg="green")
+        
+        self.widgets.append(w)
+        self.widgets.append(start)
+
+
+    def reset_window(self):
+        for widget in self.widgets:
+            widget.place_forget()
+        self.display_menu("main")
+
 
     def get_text(self):
         a = self.textfield.get('1.0', 'end-1c')
@@ -76,6 +93,17 @@ class Console():
         self.textfield.delete('1.0', 'end')
         #print("returning ", val[ind:], len(val[ind:]), "END")
         return val[ind:]
+
+    def display_menu(self, op):
+        if (op == "food"):
+            self.widgets[1].place(relx=self.x, rely=self.y)
+
+            self.widgets[2].place(relx=0.45, rely=0.5)
+            self.widgets[0].place_forget()
+        elif (op == "main"):
+            self.widgets[0].place(relx=self.x, rely=self.y)
+
+            
     
 
 class Menu(tk.Frame):
@@ -100,15 +128,6 @@ class Menu(tk.Frame):
 
     def destroy(self):
         self.window.destroy()
-        
-        window = tk.Tk()
-        window.title("ARCVision")
-        window.geometry("800x800")
-        
-        app = App(window, cap)
-        
-        app.show()
-        app.window.mainloop()
     
         
 
@@ -129,7 +148,7 @@ class App():
         self.thread.start()
 
 
-    def show(self):
+    def show(self, menu):
         title = tk.Label(self.window, text="ARCVision",
                          anchor="center",
                          font=("Times New Roman", 20))
@@ -138,11 +157,10 @@ class App():
                             font=("Time New Roman", 15))
         subtitle.place(relx=0.65, rely=0.1)
 
-        self.console.show()
-        #console.update("HI")
-
-       
-        #console.get_text()
+        if (menu == "food"):
+            self.console.display_menu("food")
+        else:
+            self.console.display_menu("main")
         
         
 
@@ -153,6 +171,9 @@ class App():
             while not self.stopEvent.is_set():
                 self.frames = get_frames(self.vs, aruco_dict, parameters, detected,
                                          foods, timeout, updated, self.console)
+                if (len(foods) > 0):
+                    WINDOW = "food"
+                    
                 self.frames[0] = cv2.resize(self.frames[0], (300,300))
                 self.frames[1] = cv2.resize(self.frames[1], (300,300))
 
@@ -196,6 +217,18 @@ if (__name__ == "__main__"):
     
     menu = Menu(window)
     menu.show()
+    menu.window.mainloop()
+
+    # new window
+    window = tk.Tk()
+
+    window.title("ARCVision")
+    window.geometry("800x800")
+    
+    app = App(window, cap)
+    
+    app.show(WINDOW)
+    app.window.mainloop()
     
 
 

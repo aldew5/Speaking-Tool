@@ -39,7 +39,7 @@ class Food(Marker):
         Marker.__init__(self, id, eindex, image, frame, corners, frame_width, frame_height, console)
 
         # display a menu to choose food options in the console
-        self.type = console.get_input("Pick a type of food (pizza or hotdog):")
+        self.type = console.display_menu("food")
         time.sleep(1)
 
     def display(self):
