@@ -38,18 +38,17 @@ class Food(Marker):
     def __init__(self, id, image, eindex, frame, corners, frame_width, frame_height, console):
         Marker.__init__(self, id, eindex, image, frame, corners, frame_width, frame_height, console)
 
+        self.console.display_menu("food")
+        self.type = "none"
         # display a menu to choose food options in the console
-        self.type = console.display_menu("food")
-        time.sleep(1)
 
     def display(self):
-  
-        if self.type == "pizza":
+        if self.type == "Pizza":
             pizza = cv2.imread("_data/pizza.jpg")
             pizza_frame = cv2.resize(pizza, (200, 200))
             Marker.display(self, pizza_frame, self.image)
             
-        elif self.type == "hotdog":
+        elif self.type == "Hotdog":
             hotdog = cv2.imread("_data/hotdog.jpg")
             hotdog_frame = cv2.resize(hotdog, (200, 200))
             Marker.display(self, hotdog_frame, self.image)

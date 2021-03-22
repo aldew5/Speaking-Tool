@@ -35,15 +35,14 @@ foods = {}
 timeout = 0
 updated = False
 
-WINDOW = "main"
 
 class Console():
     def __init__(self, x, y, window):
         self.x = x
         self.y = y
-        self.cursor = '> '
         self.window = window
         self.widgets = []
+        self.pressed = False
 
         self.widgets.append(scrolledtext.ScrolledText(self.window,  
                                       wrap = tk.WORD,  
@@ -54,10 +53,10 @@ class Console():
 
         OPTIONS = ["Pizza", "Hotdog"]
 
-        var = tk.StringVar(self.window)
-        var.set(OPTIONS[0])
+        self.food_var = tk.StringVar(self.window)
+        self.food_var.set(OPTIONS[0])
 
-        w = tk.OptionMenu(self.window, var, *OPTIONS)
+        w = tk.OptionMenu(self.window, self.food_var, *OPTIONS)
         
         start = tk.Button(self.window,
                     text="Confirm",
@@ -71,6 +70,7 @@ class Console():
     def reset_window(self):
         for widget in self.widgets:
             widget.place_forget()
+        self.pressed = True
         self.display_menu("main")
 
 
@@ -136,12 +136,13 @@ class App():
     def __init__(self, window, vs):
         self.window = window
         self.vs = vs
-        self.frames = []
+        self.frames = [0, 0]
         self.thread = None
         self.stopEvent = None
         self.panel1 = None
         self.panel2 = None
         self.console = Console(0.6, 0.15, self.window)
+        self.markers = []
         
         self.stopEvent = threading.Event()
         self.thread = threading.Thread(target=self.videoLoop, args=())
@@ -161,18 +162,20 @@ class App():
             self.console.display_menu("food")
         else:
             self.console.display_menu("main")
-        
-        
 
 
     def videoLoop(self):
 
         try:
             while not self.stopEvent.is_set():
-                self.frames = get_frames(self.vs, aruco_dict, parameters, detected,
+                self.frames[0], self.frames[1], self.markers = get_frames(self.vs, aruco_dict, parameters, detected,
                                          foods, timeout, updated, self.console)
-                if (len(foods) > 0):
-                    WINDOW = "food"
+
+                if (self.console.pressed and len(self.markers)):
+                    self.markers[-1].type = self.console.food_var.get()
+        
+                for marker in self.markers:
+                    marker.display()
                     
                 self.frames[0] = cv2.resize(self.frames[0], (300,300))
                 self.frames[1] = cv2.resize(self.frames[1], (300,300))
@@ -227,7 +230,7 @@ if (__name__ == "__main__"):
     
     app = App(window, cap)
     
-    app.show(WINDOW)
+    app.show("main")
     app.window.mainloop()
     
 

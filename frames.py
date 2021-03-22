@@ -25,7 +25,7 @@ def get_frames(cap, aruco_dict, parameters, detected, foods, timeout, updated, c
 
     # keep a list of the variables and operators currently
     # in the frame
-    curfood = []
+    markers = []
     
     # we have detected at least one marker
     if (len(corners)):
@@ -44,17 +44,17 @@ def get_frames(cap, aruco_dict, parameters, detected, foods, timeout, updated, c
                                 console)
                     detected[id] = True
                     foods[id] = food
-                curfood.append(foods[id])
+                markers.append(foods[id])
 
-        for food in curfood:
+        for marker in markers:
             eindex = -1
 
             for id in ids2:
                 eindex += 1
-                if (id == food.id):
-                    food.update(eindex, img1, frame, corners)
+                if (id == marker.id):
+                    marker.update(eindex, img1, frame, corners)
 
-            food.display()
+         
             
             
 
@@ -70,7 +70,7 @@ def get_frames(cap, aruco_dict, parameters, detected, foods, timeout, updated, c
     if cv2.waitKey(1) & 0xFF == ord('q'):
         return ()
 
-    return [img1, frame_markers]
+    return [img1, frame_markers, markers]
     
 
 
