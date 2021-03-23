@@ -73,11 +73,13 @@ class Console():
         
         self.widgets.append(w)
         self.widgets.append(start)
+        self.widgets.append(None)
 
 
     def reset_window(self):
         for widget in self.widgets:
             widget.place_forget()
+            
         self.pressed = True
         self.display_menu("main")
 
@@ -155,15 +157,6 @@ class App():
         self.console = Console(0.6, 0.15, self.window)
         self.markers = []
         self.image = ""
-
-        self.canvas = tk.Canvas(self.window, width = 300, height = 300)
-        self.canvas.place(relx=0.6, rely=0.2)
-
-        #img = ImageTk.PhotoImage(Image.open("_data/pizza.jpg"))
-        #self.canvas.create_image(500, 500, image=img)
-        
-
-
         
         self.stopEvent = threading.Event()
         self.thread = threading.Thread(target=self.videoLoop, args=())
@@ -197,17 +190,29 @@ class App():
                     self.markers[-1].type = self.console.food_var.get()
         
                 for marker in self.markers:
+                    if (type(marker) is Food):
+                        marker.type = self.console.food_var.get()
+                    #print("HERE")
                     marker.display()
+                    
 
-                ##        print(self.console.display)
+            
                 if (self.console.display == "food"):
+                    # init the image
+                                                
                     if (self.console.food_var.get() != self.image):
                         self.image = self.console.food_var.get()
+                        
+                    img = ImageTk.PhotoImage(self.images[self.image])
 
-                        print("HERE")
-                        self.canvas.create_image(20, 20, anchor=tk.NW,\
-                            image=ImageTk.PhotoImage(self.images[self.image]))
+                    if (self.console.widgets[3] == None):
+                        self.console.widgets[3] = tk.Label(self.window, image=img)
+                        self.console.widgets[3].place(relx=0.63, rely=0.25)
 
+                    else:
+                        self.console.widgets[3].configure(image=img)
+                                         
+                        
                     
                     
                 self.frames[0] = cv2.resize(self.frames[0], (300,300))
